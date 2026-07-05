@@ -1,0 +1,35 @@
+[0:00 — HOOK]
+Welcome to the demonstration of PoolSense, a personalized swim/no-swim safety advisor. Every summer, millions of people jump into pools without knowing whether the water chemistry is actually safe for their health. PoolSense bridges this gap by combining raw pool readings with individual health profiles.
+
+[0:20 — WHAT IT IS]
+PoolSense is an ADK 2.0 multi-agent assistant built for the "Agents for Good" track. It provides safety recommendations tailored to kids, seniors, and swimmers with allergies, asthma, or skin sensitivity.
+
+[0:40 — SHOW THE BANNER]
+(show assets/cover_page_banner.png)
+As you can see from our cover banner, PoolSense is automated, secure, and intelligent. It is designed to turn complex water readings into clear, actionable advice.
+
+[1:00 — ARCHITECTURE]
+(show assets/architecture_diagram.png)
+Let's look at the underlying architecture. The flow starts with user input going into the Security Checkpoint node, which scrubs PII and checks for prompt injection. Once cleared, it moves to the Orchestrator. The Orchestrator delegates tasks to two sub-agents: the Pool Analyzer Agent, which uses our custom MCP server to check chemical guidelines and calculate the Langelier Saturation Index, and the Swimmer Safety Analyst Agent, which checks swimmer profile risks. 
+
+If conditions are extremely dangerous, the HITL Checkpoint node pauses execution to ask the user to confirm they want to override the warning. Finally, the response is rendered in a clean Markdown report.
+
+[2:00 — LIVE DEMO]
+(switch to playground at localhost:18081)
+Let's see this in action. I'll paste our first test case: a healthy adult named Alice swimming in a pool with perfect parameters. 
+(pause)
+As we submit, you can see the orchestrator delegates the pool analysis and swimmer checks, returning a clean "SAFE" overall verdict, along with pool chemistry reports.
+
+Next, let's look at what happens when a swimmer has health risks. We'll input Bobby, a child who has sensitive skin, eczema, and asthma. 
+(pause)
+The agent automatically updates the verdict to "CAUTION", highlighting that the chlorine levels could irritate Bobby's skin and breathing, and advises using goggles and taking a shower immediately after swimming.
+
+Finally, let's test a dangerous condition. We'll set the chlorine level to a high 12 ppm and PH to a low 6.8. 
+(pause)
+You see the server pausing and raising a HITL interrupt, asking if we want to override the danger warning. If we type 'no', it aborts the check and drafts a manager alert message.
+
+[3:00 — SECURITY & MCP]
+All of this is supported by a robust local MCP server that calculates the Langelier Saturation Index (LSI) and diagnoses water issues, completely decoupled from the main LLM orchestrator. The security node ensures PII scrubbing and prompt injection guards are active for every turn.
+
+[3:30 — IMPACT / CLOSE]
+PoolSense prevents pool-related rashes, respiratory flares, and waterborne illnesses by translating technical chemical parameters into human safety guidance. Thank you for watching!
