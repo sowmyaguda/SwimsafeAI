@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PoolSense — Personalized Swim Safety Advisor</title>
+    <title>PoolSense — Intelligent Swim Safety Platform</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,7 +14,6 @@
                 <span>🏊</span> PoolSense
             </div>
             <div class="nav-links" id="nav-links">
-                <!-- Auth status dependent buttons -->
                 <button id="nav-login-btn" onclick="showAuthPage('login')">Login</button>
                 <button id="nav-signup-btn" class="btn-outline" onclick="showAuthPage('signup')">Sign Up</button>
                 <span id="user-greeting" class="hidden" style="margin-right: 1rem; font-weight: 600;"></span>
@@ -27,7 +26,7 @@
             <div class="hero-tagline">Personalized Smart Safety</div>
             <h1 class="hero-title">Is the water safe for <span style="color: var(--accent-cyan);">you</span> to swim?</h1>
             <p class="hero-desc">
-                PoolSense goes beyond simple chemical tests. It compares pool metrics directly with personal health profiles to give smart, tailored swimming recommendations for adults, toddlers, asthmatics, and swimmers with sensitive skin.
+                PoolSense matches pool metrics directly with personal health profiles to give smart, tailored swimming recommendations for adults, toddlers, asthmatics, and swimmers with eczema.
             </p>
             <button class="btn-primary" onclick="getStarted()">Start Assessment</button>
 
@@ -35,7 +34,7 @@
                 <div class="feature-card glass">
                     <div class="feature-icon">📊</div>
                     <h3>Water Chemistry Analysis</h3>
-                    <p>Calculates saturation index (LSI) and evaluates pH, chlorine, and cyanuric acid balances against guidelines.</p>
+                    <p>Evaluates pH, chlorine, and cyanuric acid balances against guidelines.</p>
                 </div>
                 <div class="feature-card glass">
                     <div class="feature-icon">👥</div>
@@ -45,14 +44,14 @@
                 <div class="feature-card glass">
                     <div class="feature-icon">🚨</div>
                     <h3>Manager Alerts</h3>
-                    <p>Drafts automated warning reports for hotel, gym, apartment, or community pool managers when chemicals are dangerous.</p>
+                    <p>Flags automated alerts for facility managers when pool water is hazardous.</p>
                 </div>
             </div>
         </section>
 
         <!-- Auth screen -->
         <section id="auth-screen" class="auth-wrapper hidden">
-            <!-- Login Card -->
+            <!-- Login -->
             <div id="login-card" class="auth-card glass">
                 <h2>Welcome Back</h2>
                 <div class="auth-subtitle">Login to save your swimmer profiles.</div>
@@ -72,7 +71,7 @@
                 </div>
             </div>
 
-            <!-- Signup Card -->
+            <!-- Signup -->
             <div id="signup-card" class="auth-card glass hidden">
                 <h2>Create Account</h2>
                 <div class="auth-subtitle">Sign up to analyze swimming pool safety.</div>
@@ -104,6 +103,18 @@
                 <div class="dashboard-panel glass">
                     <div class="panel-header">
                         <h2>📝 Pool & Swimmers Form</h2>
+                        <button style="background:transparent; border:none; color:var(--accent-cyan); font-weight:700; cursor:pointer;" onclick="toggleHelpGuide()">Need Help?</button>
+                    </div>
+
+                    <!-- General Help Card -->
+                    <div id="help-guide" class="help-guide-card hidden">
+                        <h4>💡 Need help finding your readings?</h4>
+                        <ul>
+                            <li><span>1. Use Pool Test Strips:</span> Standard strips measure free chlorine, pH, and stabilizer (CYA).</li>
+                            <li><span>2. Check Posted Sheets:</span> Shared pools usually post daily chemistry readings near the entrance.</li>
+                            <li><span>3. Ask Facility Staff:</span> Ask the lifeguard or pool manager for the latest test values.</li>
+                            <li><span>4. Unknown Values:</span> If you don't know a reading, select the "I don't know" checkbox below it.</li>
+                        </ul>
                     </div>
 
                     <!-- Pool inputs -->
@@ -133,28 +144,46 @@
 
                         <!-- Chlorine Slider -->
                         <div class="form-group">
-                            <label for="free-chlorine">Free Chlorine Level (ppm)</label>
-                            <div class="range-wrap">
+                            <label>
+                                Free Chlorine Level (ppm)
+                                <span class="info-icon" data-tooltip="Ideal: 2-4 ppm. Sanitation factor. Lower levels risk bacteria growth; higher levels irritate eyes/skin. Check hotel notice board.">?</span>
+                            </label>
+                            <div class="range-wrap" id="fc-wrap">
                                 <input type="range" id="free-chlorine" min="0" max="15" step="0.5" value="2.0" oninput="updateRangeVal('free-chlorine')">
                                 <span class="range-val" id="free-chlorine-val">2.0</span>
+                            </div>
+                            <div class="unknown-toggle-container">
+                                <label><input type="checkbox" id="fc-unknown" onchange="toggleUnknownField('fc')"> I don't know / Not posted</label>
                             </div>
                         </div>
 
                         <!-- pH Slider -->
                         <div class="form-group">
-                            <label for="ph-level">pH Level</label>
-                            <div class="range-wrap">
+                            <label>
+                                pH Level
+                                <span class="info-icon" data-tooltip="Ideal: 7.2-7.6. Measures acidity. Imbalances cause eye burn, skin itching, and reduce sanitizer effectiveness. Check test kits.">?</span>
+                            </label>
+                            <div class="range-wrap" id="ph-wrap">
                                 <input type="range" id="ph-level" min="6.0" max="9.0" step="0.1" value="7.4" oninput="updateRangeVal('ph-level')">
                                 <span class="range-val" id="ph-level-val">7.4</span>
+                            </div>
+                            <div class="unknown-toggle-container">
+                                <label><input type="checkbox" id="ph-unknown" onchange="toggleUnknownField('ph')"> I don't know / Not posted</label>
                             </div>
                         </div>
 
                         <!-- Stabilizer (CYA) Slider -->
                         <div class="form-group">
-                            <label for="cyanuric-acid">Cyanuric Acid / Stabilizer (ppm)</label>
-                            <div class="range-wrap">
+                            <label>
+                                Cyanuric Acid / Stabilizer (ppm)
+                                <span class="info-icon" data-tooltip="Ideal: 30-50 ppm. Also called stabilizer. Protects chlorine from sunlight degradation. Excessive levels lock up chlorine. Check test kit.">?</span>
+                            </label>
+                            <div class="range-wrap" id="cya-wrap">
                                 <input type="range" id="cyanuric-acid" min="0" max="150" step="5" value="40" oninput="updateRangeVal('cyanuric-acid')">
                                 <span class="range-val" id="cyanuric-acid-val">40</span>
+                            </div>
+                            <div class="unknown-toggle-container">
+                                <label><input type="checkbox" id="cya-unknown" onchange="toggleUnknownField('cya')"> I don't know / Not posted</label>
                             </div>
                         </div>
 
@@ -178,10 +207,10 @@
                             </div>
                         </div>
 
-                        <h4 style="margin:1rem 0 0.5rem 0; font-size:0.9rem; color:var(--text-secondary);">Incident Checklist</h4>
+                        <h4 style="margin:1.5rem 0 0.5rem 0; font-size:0.9rem; color:var(--text-secondary);">Incident Checklist</h4>
                         <div class="checkbox-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" id="strong-smell"> Strong chemical/chlorine smell
+                                <input type="checkbox" id="strong-smell"> Strong chemical / chlorine smell
                             </label>
                             <label class="checkbox-label">
                                 <input type="checkbox" id="rain-heavy-use"> Recent heavy rain / high swimmer load
@@ -193,12 +222,14 @@
                     </form>
 
                     <!-- Swimmers inputs -->
-                    <div>
-                        <h3 style="margin-bottom:1rem; color:var(--accent-cyan); font-size:1.1rem;">2. Swimmer Group</h3>
-                        <div class="swimmer-list" id="swimmer-badges-container">
-                            <!-- Swimmer badges injected here -->
+                    <div class="swimmers-section">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                            <h3 style="color:var(--accent-cyan); font-size:1.1rem;">2. Swimmer Group</h3>
+                            <button class="btn-primary" style="padding: 0.4rem 1rem; font-size:0.8rem;" onclick="openSwimmerModal()">+ Add Profile</button>
                         </div>
-                        <button class="btn-add-swimmer" style="margin-top:0.75rem;" onclick="openSwimmerModal()">+ Add Swimmer Profile</button>
+                        <div class="swimmer-cards-grid" id="swimmer-cards-container">
+                            <!-- Swimmer profile cards injected here -->
+                        </div>
                     </div>
 
                     <button class="btn-primary" style="width:100%; margin-top:1.5rem; padding: 1rem;" onclick="submitPoolSenseRequest()">🔍 Check Swimming Safety</button>
@@ -215,7 +246,7 @@
                         <span style="font-size:3.5rem;">🏖️</span>
                         <h3 style="font-weight:600; margin-top: 1rem;">No Assessment Run Yet</h3>
                         <p style="color:var(--text-secondary); max-width:320px; font-size:0.9rem; margin-top:0.5rem;">
-                            Fill in the pool chemistry details and swimmer group profiles on the left, then click check.
+                            Fill in the pool details and swimmer group profiles on the left, then click check.
                         </p>
                     </div>
 
@@ -223,11 +254,20 @@
                     <div id="results-loader" class="loader-wrapper hidden">
                         <span class="loader"></span>
                         <h3>Running PoolSense AI Assessment...</h3>
-                        <p style="color:var(--text-secondary); font-size:0.85rem; margin-top:0.5rem;">Connecting to agent graph and verifying safety metrics</p>
+                        <p style="color:var(--text-secondary); font-size:0.85rem; margin-top:0.5rem;">Orchestrating agent workflows and evaluating health factors</p>
                     </div>
 
                     <!-- Results content -->
-                    <div id="results-content" class="results-grid hidden">
+                    <div id="results-content" class="results-container hidden">
+                        <!-- Warning banner for unknown values -->
+                        <div id="confidence-warning" class="warning-banner hidden">
+                            <span style="font-size:1.2rem;">⚠️</span>
+                            <div>
+                                <strong>Lower Confidence Verdict</strong>
+                                <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.1rem;">Some chemical readings are incomplete. Recommendations are conservative; consider testing the water before swimming.</p>
+                            </div>
+                        </div>
+
                         <!-- Card 1: Verdict -->
                         <div class="result-card glass" id="card-verdict">
                             <div class="verdict-header">
@@ -270,8 +310,11 @@
     <div class="modal" id="swimmer-modal">
         <div class="modal-content glass">
             <button class="modal-close" onclick="closeSwimmerModal()">&times;</button>
-            <h2 style="margin-bottom:1.5rem; font-weight:700;">Add Swimmer Profile</h2>
+            <h2 id="modal-title" style="margin-bottom:1.5rem; font-weight:700;">Add Swimmer Profile</h2>
+            
             <form id="swimmer-form" onsubmit="saveSwimmerProfile(event)">
+                <input type="hidden" id="editing-swimmer-id">
+                
                 <div class="form-group">
                     <label for="swimmer-name">Swimmer Name</label>
                     <input type="text" id="swimmer-name" required placeholder="e.g. Bobby, Emily">
@@ -284,7 +327,7 @@
                             <option value="adult">Adult</option>
                             <option value="child">Child</option>
                             <option value="toddler">Toddler</option>
-                            <option value="senior">Older Adult / Senior</option>
+                            <option value="senior">Older Adult</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -292,7 +335,7 @@
                         <select id="swim-ability">
                             <option value="strong">Strong Swimmer</option>
                             <option value="average">Average Swimmer</option>
-                            <option value="weak">Weak Swimmer / Non-swimmer</option>
+                            <option value="weak">Weak Swimmer</option>
                         </select>
                     </div>
                 </div>
@@ -302,26 +345,35 @@
                     <input type="text" id="allergies" placeholder="e.g. chlorine allergy, skin rashes, or leave blank">
                 </div>
 
-                <h4 style="margin:1rem 0 0.5rem 0; font-size:0.9rem; color:var(--text-secondary);">Health Checklist</h4>
+                <h4 style="margin:1rem 0 0.5rem 0; font-size:0.85rem; color:var(--text-secondary); font-weight:700;">Health Sensitivity Checklist</h4>
                 <div class="checkbox-group">
                     <label class="checkbox-label">
-                        <input type="checkbox" id="asthma"> Asthma / Respiratory sensitivity
+                        <input type="checkbox" id="asthma"> Asthma / Breathing sensitivity
+                        <span class="info-icon" data-tooltip="Airway constriction. Chemical vapors in indoor environments can trigger coughing/wheezing.">?</span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" id="eczema"> Sensitive skin / Eczema / Psoriasis
+                        <span class="info-icon" data-tooltip="Dry/cracked skin. Acidic water (low pH) or excess chlorine causes itching, inflammation, and flares.">?</span>
                     </label>
                     <label class="checkbox-label">
-                        <input type="checkbox" id="eye-sens"> High eye sensitivity to pool water
+                        <input type="checkbox" id="eye-sens"> High eye sensitivity
+                        <span class="info-icon" data-tooltip="Imbalanced pH or combined chlorine (chloramines) irritate delicate eye tissue. Goggles recommended.">?</span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" id="cuts-wounds"> Open cuts / scratches / stitches
+                        <span class="info-icon" data-tooltip="Infection risk. Open barriers permit water-borne bacteria entry if sanitizer is low.">?</span>
                     </label>
                     <label class="checkbox-label">
-                        <input type="checkbox" id="illness"> Recent stomach illness (last 2 weeks)
+                        <input type="checkbox" id="illness"> Recent stomach illness (past 2 weeks)
+                        <span class="info-icon" data-tooltip="Contamination concern. Shedding pathogens (e.g. Cryptosporidium) endangers others if sanitizer fails.">?</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="weak-swimmer-check"> Weak swimmer / Needs supervision
+                        <span class="info-icon" data-tooltip="Drowning prevention. Non-proficient swimmers require active touch supervision.">?</span>
                     </label>
                 </div>
 
-                <button type="submit" class="btn-primary" style="width:100%; margin-top:1.5rem; padding:0.9rem;">Add Swimmer</button>
+                <button type="submit" class="btn-primary" style="width:100%; margin-top:1.5rem; padding:0.9rem;" id="modal-submit-btn">Add Swimmer</button>
             </form>
         </div>
     </div>
