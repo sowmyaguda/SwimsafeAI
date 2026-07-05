@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Sample default swimmer
         swimmersList = [
             {
-                id: 'default-bobby',
                 name: "Bobby",
                 age_group: "child",
                 swimming_ability: "average",
@@ -34,11 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 sensitive_skin_eczema: true,
                 eye_sensitivity: true,
                 open_cuts_wounds: false,
-                recent_illness: false,
-                weak_swimmer: false
+                recent_illness: false
             }
         ];
-        localStorage.setItem('poolsense_swimmers', JSON.stringify(swimmersList));
     }
     renderSwimmers();
 });
@@ -87,31 +84,15 @@ function updateNavbar() {
     }
 }
 
-// Help Guide Card toggle
-function toggleHelpGuide() {
-    const card = document.getElementById('help-guide');
-    card.classList.toggle('hidden');
-}
-
 // Slider Handler
 function updateRangeVal(id) {
     const val = document.getElementById(id).value;
     document.getElementById(`${id}-val`).innerText = val;
 }
 
-// Unknown field toggler
-function toggleUnknownField(fieldId) {
-    const isUnknown = document.getElementById(`${fieldId}-unknown`).checked;
-    const wrap = document.getElementById(`${fieldId}-wrap`);
-    const input = wrap.querySelector('input');
-    
-    if (isUnknown) {
-        wrap.classList.add('disabled');
-        input.disabled = true;
-    } else {
-        wrap.classList.remove('disabled');
-        input.disabled = false;
-    }
+function toggleHelpGuide() {
+    const guide = document.getElementById('help-guide');
+    guide.classList.toggle('hidden');
 }
 
 // Authentication Logic
@@ -141,45 +122,18 @@ function handleLogout() {
 }
 
 // Swimmer Modal and Controller
-function openSwimmerModal(editId = null) {
+function openSwimmerModal() {
     document.getElementById('swimmer-modal').style.display = 'flex';
-    
-    if (editId) {
-        document.getElementById('modal-title').innerText = "Edit Swimmer Profile";
-        document.getElementById('modal-submit-btn').innerText = "Save Changes";
-        document.getElementById('editing-swimmer-id').value = editId;
-        
-        const swimmer = swimmersList.find(s => s.id === editId);
-        if (swimmer) {
-            document.getElementById('swimmer-name').value = swimmer.name;
-            document.getElementById('age-group').value = swimmer.age_group;
-            document.getElementById('swim-ability').value = swimmer.swimming_ability;
-            document.getElementById('allergies').value = swimmer.allergies || "";
-            document.getElementById('asthma').checked = swimmer.asthma_breathing_sensitivity;
-            document.getElementById('eczema').checked = swimmer.sensitive_skin_eczema;
-            document.getElementById('eye-sens').checked = swimmer.eye_sensitivity;
-            document.getElementById('cuts-wounds').checked = swimmer.open_cuts_wounds;
-            document.getElementById('illness').checked = swimmer.recent_illness;
-            document.getElementById('weak-swimmer-check').checked = swimmer.weak_swimmer || false;
-        }
-    } else {
-        document.getElementById('modal-title').innerText = "Add Swimmer Profile";
-        document.getElementById('modal-submit-btn').innerText = "Add Swimmer";
-        document.getElementById('editing-swimmer-id').value = "";
-    }
 }
 
 function closeSwimmerModal() {
     document.getElementById('swimmer-modal').style.display = 'none';
     document.getElementById('swimmer-form').reset();
-    document.getElementById('editing-swimmer-id').value = "";
 }
 
 function saveSwimmerProfile(event) {
     event.preventDefault();
-    const editId = document.getElementById('editing-swimmer-id').value;
-    
-    const swimmerData = {
+    const newSwimmer = {
         name: document.getElementById('swimmer-name').value,
         age_group: document.getElementById('age-group').value,
         swimming_ability: document.getElementById('swim-ability').value,
@@ -188,86 +142,43 @@ function saveSwimmerProfile(event) {
         sensitive_skin_eczema: document.getElementById('eczema').checked,
         eye_sensitivity: document.getElementById('eye-sens').checked,
         open_cuts_wounds: document.getElementById('cuts-wounds').checked,
-        recent_illness: document.getElementById('illness').checked,
-        weak_swimmer: document.getElementById('weak-swimmer-check').checked
+        recent_illness: document.getElementById('illness').checked
     };
     
-    if (editId) {
-        // Edit existing
-        const idx = swimmersList.findIndex(s => s.id === editId);
-        if (idx !== -1) {
-            swimmerData.id = editId;
-            swimmersList[idx] = swimmerData;
-        }
-    } else {
-        // Add new
-        swimmerData.id = 'swimmer-' + Date.now();
-        swimmersList.push(swimmerData);
-    }
-    
+    swimmersList.push(newSwimmer);
     localStorage.setItem('poolsense_swimmers', JSON.stringify(swimmersList));
     renderSwimmers();
     closeSwimmerModal();
 }
 
-function deleteSwimmer(id) {
-    swimmersList = swimmersList.filter(s => s.id !== id);
+function deleteSwimmer(index) {
+    swimmersList.splice(index, 1);
     localStorage.setItem('poolsense_swimmers', JSON.stringify(swimmersList));
     renderSwimmers();
 }
 
 function renderSwimmers() {
-    const container = document.getElementById('swimmer-cards-container');
+    const container = document.getElementById('swimmer-badges-container');
     container.innerHTML = '';
     
     if (swimmersList.length === 0) {
-        container.innerHTML = '<p style="color:var(--text-secondary); font-size:0.9rem; font-style:italic;">No swimmer profiles added. Add at least one swimmer.</p>';
+        container.innerHTML = '<p style="color:var(--text-secondary); font-size:0.9rem; font-style:italic;">No swimmers added. Add at least one swimmer.</p>';
         return;
     }
     
-    swimmersList.forEach(s => {
-        const card = document.createElement('div');
-        card.className = 'swimmer-card glass';
-        
-        // Build health badges
-        let badgesHTML = `<span class="swimmer-badge-item age">${s.age_group}</span>`;
-        badgesHTML += `<span class="swimmer-badge-item ability">${s.swimming_ability}</span>`;
-        
-        if (s.allergies) {
-            badgesHTML += `<span class="swimmer-badge-item allergy" title="${s.allergies}">Allergies</span>`;
-        }
-        if (s.asthma_breathing_sensitivity) {
-            badgesHTML += `<span class="swimmer-badge-item asthma">Asthma</span>`;
-        }
-        if (s.sensitive_skin_eczema) {
-            badgesHTML += `<span class="swimmer-badge-item skin">Eczema</span>`;
-        }
-        if (s.eye_sensitivity) {
-            badgesHTML += `<span class="swimmer-badge-item skin">Eyes</span>`;
-        }
-        if (s.open_cuts_wounds) {
-            badgesHTML += `<span class="swimmer-badge-item danger">Wounds</span>`;
-        }
-        if (s.recent_illness) {
-            badgesHTML += `<span class="swimmer-badge-item danger">Illness</span>`;
-        }
-        if (s.weak_swimmer) {
-            badgesHTML += `<span class="swimmer-badge-item danger">Weak Swim</span>`;
-        }
-        
-        card.innerHTML = `
-            <div class="swimmer-card-header">
-                <span class="swimmer-card-name">${s.name}</span>
-                <div class="swimmer-card-actions">
-                    <button class="btn-edit" onclick="openSwimmerModal('${s.id}')">✏️</button>
-                    <button class="btn-delete" onclick="deleteSwimmer('${s.id}')">🗑️</button>
-                </div>
+    swimmersList.forEach((swimmer, idx) => {
+        const badge = document.createElement('div');
+        badge.className = 'swimmer-badge';
+        badge.innerHTML = `
+            <div>
+                <span>${swimmer.name}</span>
+                <small style="display:block; color:var(--text-secondary); font-size:0.75rem;">
+                    ${swimmer.age_group} (${swimmer.swimming_ability})
+                </small>
             </div>
-            <div class="swimmer-badge-list">
-                ${badgesHTML}
-            </div>
+            <button onclick="deleteSwimmer(${idx})">&times;</button>
         `;
-        container.appendChild(card);
+        container.appendChild(badge);
     });
 }
 
@@ -297,25 +208,15 @@ async function submitPoolSenseRequest(confirmAnswer = null) {
             activeSessionId = sessionData.id;
         }
         
-        // 2. Assemble input payload & identify unknown states
+        // 2. Assemble input payload
         let messageText = "";
-        let hasUnknownFields = false;
-        
         if (confirmAnswer) {
             messageText = confirmAnswer;
         } else {
-            const isFcUnknown = document.getElementById('fc-unknown').checked;
-            const isPhUnknown = document.getElementById('ph-unknown').checked;
-            const isCyaUnknown = document.getElementById('cya-unknown').checked;
-            
-            if (isFcUnknown || isPhUnknown || isCyaUnknown) {
-                hasUnknownFields = true;
-            }
-            
             const poolReadings = {
-                free_chlorine: isFcUnknown ? null : parseFloat(document.getElementById('free-chlorine').value),
-                ph: isPhUnknown ? null : parseFloat(document.getElementById('ph-level').value),
-                cyanuric_acid: isCyaUnknown ? null : parseFloat(document.getElementById('cyanuric-acid').value),
+                free_chlorine: parseFloat(document.getElementById('free-chlorine').value),
+                ph: parseFloat(document.getElementById('ph-level').value),
+                cyanuric_acid: parseFloat(document.getElementById('cyanuric-acid').value),
                 water_clarity: document.getElementById('water-clarity').value,
                 strong_chemical_smell: document.getElementById('strong-smell').checked,
                 indoor_outdoor: document.getElementById('indoor-outdoor').value,
@@ -323,21 +224,12 @@ async function submitPoolSenseRequest(confirmAnswer = null) {
                 contamination_incident: document.getElementById('contamination-incident').checked
             };
             
-            // Clean swimmer objects (remove id parameter for validation)
-            const cleanSwimmers = swimmersList.map(s => {
-                const { id, ...rest } = s;
-                return rest;
-            });
-            
             const fullPayload = {
                 pool_readings: poolReadings,
-                swimmers: cleanSwimmers
+                swimmers: swimmersList
             };
             messageText = JSON.stringify(fullPayload);
         }
-        
-        // Store unknown state flag temporarily
-        sessionStorage.setItem('poolsense_last_check_unknown', hasUnknownFields ? 'true' : 'false');
         
         // 3. Post run request to the agent
         const runResponse = await fetch('/run', {
@@ -375,6 +267,7 @@ async function submitPoolSenseRequest(confirmAnswer = null) {
                 finalEvent = ev;
                 break;
             }
+            // Check if backend returned a security event direct string in the output
             if (ev.output && typeof ev.output === 'string') {
                 finalEvent = ev;
                 break;
@@ -382,7 +275,8 @@ async function submitPoolSenseRequest(confirmAnswer = null) {
         }
         
         if (interruptEvent) {
-            const confirmMsg = prompt(interruptEvent.content?.parts?.[0]?.text || "The pool chemistry is flagged as dangerously unbalanced! Do you wish to override this warning and show safety advice anyway? (Enter 'yes' to override and proceed, or 'no' to abort):");
+            // Handle HITL warning and request confirmation
+            const confirmMsg = prompt(interruptEvent.content?.parts?.[0]?.text || "The pool chemistry is flagged as dangerously unbalanced! Do you wish to override this warning and show personal swimmer advice anyway? (Enter 'yes' to proceed, or 'no' to abort):");
             if (confirmMsg) {
                 submitPoolSenseRequest(confirmMsg);
             } else {
@@ -392,10 +286,9 @@ async function submitPoolSenseRequest(confirmAnswer = null) {
         }
         
         if (finalEvent) {
-            const isUnknownResult = sessionStorage.getItem('poolsense_last_check_unknown') === 'true';
-            renderResults(finalEvent.output, isUnknownResult);
+            renderResults(finalEvent.output);
         } else {
-            throw new Error("No safety report returned from agent graph.");
+            throw new Error("No final assessment returned from agent graph.");
         }
         
     } catch (err) {
@@ -407,17 +300,9 @@ async function submitPoolSenseRequest(confirmAnswer = null) {
 }
 
 // Render Results cards
-function renderResults(output, isUnknownResult) {
+function renderResults(output) {
     const content = document.getElementById('results-content');
     content.classList.remove('hidden');
-    
-    // Warning banner trigger
-    const banner = document.getElementById('confidence-warning');
-    if (isUnknownResult) {
-        banner.classList.remove('hidden');
-    } else {
-        banner.classList.add('hidden');
-    }
     
     // Check if security blocked
     if (typeof output === 'string') {
@@ -441,7 +326,7 @@ function renderResults(output, isUnknownResult) {
     const overallBadge = document.getElementById('verdict-overall-badge');
     const verdictCard = document.getElementById('card-verdict');
     
-    overallBadge.innerText = overallVerdict === 'not recommended' ? 'Blocked' : overallVerdict;
+    overallBadge.innerText = overallVerdict;
     
     if (overallVerdict === 'safe') {
         overallBadge.className = 'badge-status safe';
@@ -460,9 +345,9 @@ function renderResults(output, isUnknownResult) {
     
     let poolMetricsHTML = `
         <div class="detail-item"><span>Sanitation Status:</span><span>${poolAnalysis.clarity_sanitation_status}</span></div>
-        <div class="detail-item"><span>Chlorine Status:</span><span>${poolAnalysis.chlorine_status}</span></div>
-        <div class="detail-item"><span>pH Level Status:</span><span>${poolAnalysis.ph_status}</span></div>
-        <div class="detail-item"><span>Cyanuric Acid (CYA):</span><span>${poolAnalysis.stabilizer_status}</span></div>
+        <div class="detail-item"><span>Chlorine Level:</span><span>${poolAnalysis.chlorine_status}</span></div>
+        <div class="detail-item"><span>pH Balance:</span><span>${poolAnalysis.ph_status}</span></div>
+        <div class="detail-item"><span>Stabilizer CYA:</span><span>${poolAnalysis.stabilizer_status}</span></div>
     `;
     
     if (poolAnalysis.key_warnings && poolAnalysis.key_warnings.length > 0) {
@@ -478,7 +363,7 @@ function renderResults(output, isUnknownResult) {
     
     metricsContainer.innerHTML = poolMetricsHTML;
     
-    // Swimmers Safety Guidance & Reasons
+    // Swimmers Safety Guidance
     const swimmerContainer = document.getElementById('swimmers-guidance-container');
     swimmerContainer.innerHTML = '';
     
@@ -486,51 +371,21 @@ function renderResults(output, isUnknownResult) {
         const item = document.createElement('div');
         item.className = 'swimmer-report-item';
         
-        const swimmerVerdict = sv.verdict.toLowerCase();
-        const statusBadgeClass = swimmerVerdict === 'safe' ? 'safe' : swimmerVerdict === 'caution' ? 'caution' : 'danger';
-        
-        // Find swimmer details to add context reasons
-        const matchingSwimmerObj = swimmersList.find(s => s.name.toLowerCase() === sv.swimmer_name.toLowerCase());
-        let reasonExplanation = "";
-        
-        if (swimmerVerdict === 'not recommended') {
-            if (matchingSwimmerObj && matchingSwimmerObj.open_cuts_wounds) {
-                reasonExplanation = "⚠️ Swimming is not recommended because this swimmer has active open wounds which pose high risk of infection in pool water.";
-            } else if (matchingSwimmerObj && matchingSwimmerObj.recent_illness) {
-                reasonExplanation = "⚠️ Swimming is not recommended because this swimmer has had a recent stomach illness and could contaminate the water.";
-            } else {
-                reasonExplanation = "🚨 Not recommended due to severe chemical deviations in the water.";
-            }
-        } else if (swimmerVerdict === 'caution') {
-            if (matchingSwimmerObj && matchingSwimmerObj.asthma_breathing_sensitivity) {
-                reasonExplanation = "💡 Use caution because this swimmer has asthma/respiratory sensitivity which reacts to chemical odors.";
-            } else if (matchingSwimmerObj && matchingSwimmerObj.sensitive_skin_eczema) {
-                reasonExplanation = "💡 Use caution because this swimmer has sensitive skin/eczema which is highly sensitive to pH variations.";
-            } else if (matchingSwimmerObj && matchingSwimmerObj.allergies) {
-                reasonExplanation = `💡 Use caution due to active allergies: ${matchingSwimmerObj.allergies}.`;
-            } else {
-                reasonExplanation = "💡 Caution advised due to moderate chemical fluctuations.";
-            }
-        } else {
-            reasonExplanation = "✅ Swimmer meets all safety criteria with no health vulnerabilities matching current conditions.";
-        }
+        const statusBadgeClass = sv.verdict.toLowerCase() === 'safe' ? 'safe' : sv.verdict.toLowerCase() === 'caution' ? 'caution' : 'danger';
         
         item.innerHTML = `
             <div class="swimmer-report-title">
                 <span style="font-weight:600;">${sv.swimmer_name}</span>
                 <span class="badge-status ${statusBadgeClass}">${sv.verdict}</span>
             </div>
-            <p style="font-size:0.8rem; color:var(--accent-cyan); font-weight:700; margin: 0.25rem 0 0.5rem 0;">
-                ${reasonExplanation}
-            </p>
             ${sv.risks && sv.risks.length > 0 ? `
                 <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.5rem;">
-                    <strong>Hazards:</strong> ${sv.risks.join(', ')}
+                    <strong>Risks:</strong> ${sv.risks.join(', ')}
                 </p>
             ` : ''}
             ${sv.guidance && sv.guidance.length > 0 ? `
                 <div style="margin-top:0.25rem;">
-                    <strong style="font-size:0.8rem; color:var(--text-primary);">Precautions:</strong>
+                    <strong style="font-size:0.8rem; color:var(--accent-cyan);">Guidance & Safety:</strong>
                     <ul class="list-styled" style="margin-top:0.15rem;">
                         ${sv.guidance.map(g => `<li>${g}</li>`).join('')}
                     </ul>
