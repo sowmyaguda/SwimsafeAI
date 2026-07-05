@@ -76,6 +76,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
 
 
+from fastapi.staticfiles import StaticFiles
+
 app: FastAPI = get_fast_api_app(
     agents_dir=AGENT_DIR,
     web=True,
@@ -88,6 +90,8 @@ app: FastAPI = get_fast_api_app(
 app.title = "pool-sense"
 app.description = "API for interacting with the Agent pool-sense"
 
+# Serve custom web dashboard static files
+app.mount("/dashboard", StaticFiles(directory="frontend", html=True), name="frontend")
 
 # Proxy routes so the Vertex AI Console Playground (reasoning_engine SDK) can
 # talk to this agent alongside the native adk_api routes.

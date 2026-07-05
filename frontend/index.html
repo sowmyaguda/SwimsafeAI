@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PoolSense — Personalized Swim Safety Advisor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Navbar -->
+        <nav class="navbar glass">
+            <div class="brand">
+                <span>🏊</span> PoolSense
+            </div>
+            <div class="nav-links" id="nav-links">
+                <!-- Auth status dependent buttons -->
+                <button id="nav-login-btn" onclick="showAuthPage('login')">Login</button>
+                <button id="nav-signup-btn" class="btn-outline" onclick="showAuthPage('signup')">Sign Up</button>
+                <span id="user-greeting" class="hidden" style="margin-right: 1rem; font-weight: 600;"></span>
+                <button id="nav-logout-btn" class="btn-outline hidden" onclick="handleLogout()">Logout</button>
+            </div>
+        </nav>
+
+        <!-- Landing Screen -->
+        <section id="landing-screen" class="hero-section">
+            <div class="hero-tagline">Personalized Smart Safety</div>
+            <h1 class="hero-title">Is the water safe for <span style="color: var(--accent-cyan);">you</span> to swim?</h1>
+            <p class="hero-desc">
+                PoolSense goes beyond simple chemical tests. It compares pool metrics directly with personal health profiles to give smart, tailored swimming recommendations for adults, toddlers, asthmatics, and swimmers with sensitive skin.
+            </p>
+            <button class="btn-primary" onclick="getStarted()">Start Assessment</button>
+
+            <div class="features-grid">
+                <div class="feature-card glass">
+                    <div class="feature-icon">📊</div>
+                    <h3>Water Chemistry Analysis</h3>
+                    <p>Calculates saturation index (LSI) and evaluates pH, chlorine, and cyanuric acid balances against guidelines.</p>
+                </div>
+                <div class="feature-card glass">
+                    <div class="feature-icon">👥</div>
+                    <h3>Personalized Risk Checks</h3>
+                    <p>Scans health histories (eczema, asthma, allergies, open wounds) to warn users about specific hazards.</p>
+                </div>
+                <div class="feature-card glass">
+                    <div class="feature-icon">🚨</div>
+                    <h3>Manager Alerts</h3>
+                    <p>Drafts automated warning reports for hotel, gym, apartment, or community pool managers when chemicals are dangerous.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Auth screen -->
+        <section id="auth-screen" class="auth-wrapper hidden">
+            <!-- Login Card -->
+            <div id="login-card" class="auth-card glass">
+                <h2>Welcome Back</h2>
+                <div class="auth-subtitle">Login to save your swimmer profiles.</div>
+                <form onsubmit="handleAuthSubmit(event, 'login')">
+                    <div class="form-group">
+                        <label for="login-email">Email Address</label>
+                        <input type="email" id="login-email" required placeholder="name@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-pass">Password</label>
+                        <input type="password" id="login-pass" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width:100%; margin-top: 1rem;">Login</button>
+                </form>
+                <div class="auth-toggle">
+                    Don't have an account? <a href="#" onclick="showAuthPage('signup')">Sign up</a>
+                </div>
+            </div>
+
+            <!-- Signup Card -->
+            <div id="signup-card" class="auth-card glass hidden">
+                <h2>Create Account</h2>
+                <div class="auth-subtitle">Sign up to analyze swimming pool safety.</div>
+                <form onsubmit="handleAuthSubmit(event, 'signup')">
+                    <div class="form-group">
+                        <label for="signup-name">Full Name</label>
+                        <input type="text" id="signup-name" required placeholder="John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-email">Email Address</label>
+                        <input type="email" id="signup-email" required placeholder="name@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-pass">Password</label>
+                        <input type="password" id="signup-pass" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width:100%; margin-top: 1rem;">Create Account</button>
+                </form>
+                <div class="auth-toggle">
+                    Already have an account? <a href="#" onclick="showAuthPage('login')">Login</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Dashboard Screen -->
+        <section id="dashboard-screen" class="hidden">
+            <div class="dashboard-layout">
+                <!-- Left Input Panel -->
+                <div class="dashboard-panel glass">
+                    <div class="panel-header">
+                        <h2>📝 Pool & Swimmers Form</h2>
+                    </div>
+
+                    <!-- Pool inputs -->
+                    <form id="pool-form" onsubmit="event.preventDefault();">
+                        <h3 style="margin-bottom:1rem; color:var(--accent-cyan); font-size:1.1rem;">1. Pool Conditions</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="pool-type">Pool Facility Type</label>
+                                <select id="pool-type">
+                                    <option value="home">Home Pool</option>
+                                    <option value="apartment/community">Apartment / Community Pool</option>
+                                    <option value="hotel">Hotel Pool</option>
+                                    <option value="gym">Gym Pool</option>
+                                    <option value="school">School Pool</option>
+                                    <option value="friend's pool">Friend's Pool</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="indoor-outdoor">Location Type</label>
+                                <select id="indoor-outdoor">
+                                    <option value="outdoor">Outdoor Pool</option>
+                                    <option value="indoor">Indoor Pool</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Chlorine Slider -->
+                        <div class="form-group">
+                            <label for="free-chlorine">Free Chlorine Level (ppm)</label>
+                            <div class="range-wrap">
+                                <input type="range" id="free-chlorine" min="0" max="15" step="0.5" value="2.0" oninput="updateRangeVal('free-chlorine')">
+                                <span class="range-val" id="free-chlorine-val">2.0</span>
+                            </div>
+                        </div>
+
+                        <!-- pH Slider -->
+                        <div class="form-group">
+                            <label for="ph-level">pH Level</label>
+                            <div class="range-wrap">
+                                <input type="range" id="ph-level" min="6.0" max="9.0" step="0.1" value="7.4" oninput="updateRangeVal('ph-level')">
+                                <span class="range-val" id="ph-level-val">7.4</span>
+                            </div>
+                        </div>
+
+                        <!-- Stabilizer (CYA) Slider -->
+                        <div class="form-group">
+                            <label for="cyanuric-acid">Cyanuric Acid / Stabilizer (ppm)</label>
+                            <div class="range-wrap">
+                                <input type="range" id="cyanuric-acid" min="0" max="150" step="5" value="40" oninput="updateRangeVal('cyanuric-acid')">
+                                <span class="range-val" id="cyanuric-acid-val">40</span>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="water-clarity">Water Clarity</label>
+                                <select id="water-clarity">
+                                    <option value="clear">Crystal Clear</option>
+                                    <option value="cloudy">Cloudy Water</option>
+                                    <option value="turbid">Turbid / Murky Water</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="last-tested">Last Tested Time</label>
+                                <select id="last-tested">
+                                    <option value="just now">Just Now</option>
+                                    <option value="today">Earlier Today</option>
+                                    <option value="yesterday">Yesterday</option>
+                                    <option value="more than 2 days ago">More than 2 days ago</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <h4 style="margin:1rem 0 0.5rem 0; font-size:0.9rem; color:var(--text-secondary);">Incident Checklist</h4>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="strong-smell"> Strong chemical/chlorine smell
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="rain-heavy-use"> Recent heavy rain / high swimmer load
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="contamination-incident"> Recent fecal / vomit / blood contamination incident
+                            </label>
+                        </div>
+                    </form>
+
+                    <!-- Swimmers inputs -->
+                    <div>
+                        <h3 style="margin-bottom:1rem; color:var(--accent-cyan); font-size:1.1rem;">2. Swimmer Group</h3>
+                        <div class="swimmer-list" id="swimmer-badges-container">
+                            <!-- Swimmer badges injected here -->
+                        </div>
+                        <button class="btn-add-swimmer" style="margin-top:0.75rem;" onclick="openSwimmerModal()">+ Add Swimmer Profile</button>
+                    </div>
+
+                    <button class="btn-primary" style="width:100%; margin-top:1.5rem; padding: 1rem;" onclick="submitPoolSenseRequest()">🔍 Check Swimming Safety</button>
+                </div>
+
+                <!-- Right Output Panel -->
+                <div class="dashboard-panel glass" id="results-panel">
+                    <div class="panel-header">
+                        <h2>📊 Safety Assessment Results</h2>
+                    </div>
+                    
+                    <!-- Welcome Placeholder -->
+                    <div id="results-placeholder" class="hero-section" style="padding: 6rem 1rem;">
+                        <span style="font-size:3.5rem;">🏖️</span>
+                        <h3 style="font-weight:600; margin-top: 1rem;">No Assessment Run Yet</h3>
+                        <p style="color:var(--text-secondary); max-width:320px; font-size:0.9rem; margin-top:0.5rem;">
+                            Fill in the pool chemistry details and swimmer group profiles on the left, then click check.
+                        </p>
+                    </div>
+
+                    <!-- Loader -->
+                    <div id="results-loader" class="loader-wrapper hidden">
+                        <span class="loader"></span>
+                        <h3>Running PoolSense AI Assessment...</h3>
+                        <p style="color:var(--text-secondary); font-size:0.85rem; margin-top:0.5rem;">Connecting to agent graph and verifying safety metrics</p>
+                    </div>
+
+                    <!-- Results content -->
+                    <div id="results-content" class="results-grid hidden">
+                        <!-- Card 1: Verdict -->
+                        <div class="result-card glass" id="card-verdict">
+                            <div class="verdict-header">
+                                <h3>Pool Safety Verdict</h3>
+                                <span class="badge-status" id="verdict-overall-badge">Safe</span>
+                            </div>
+                            <div id="pool-assessment-metrics">
+                                <!-- Injected dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Swimmers -->
+                        <div class="result-card glass" id="card-swimmers">
+                            <h3 style="margin-bottom:1.25rem; font-weight:700;">Personal Swimmer Advice</h3>
+                            <div id="swimmers-guidance-container">
+                                <!-- Injected dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Precautions -->
+                        <div class="result-card glass" id="card-precautions">
+                            <h3 style="margin-bottom:1rem; font-weight:700; color:var(--accent-cyan);">🛠️ Action Items & Balancing</h3>
+                            <ul class="list-styled" id="maintenance-recs-container">
+                                <!-- Injected dynamically -->
+                            </ul>
+                        </div>
+
+                        <!-- Card 4: Alerts -->
+                        <div class="result-card glass hidden" id="card-alerts">
+                            <h3 style="margin-bottom:0.75rem; font-weight:700; color:var(--color-danger);">🚨 Pool Manager Alert</h3>
+                            <p id="manager-alert-text" style="font-size:0.9rem; border-left:3px solid var(--color-danger); padding-left:1rem; font-style:italic; color:var(--text-secondary);"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Swimmer profile modal -->
+    <div class="modal" id="swimmer-modal">
+        <div class="modal-content glass">
+            <button class="modal-close" onclick="closeSwimmerModal()">&times;</button>
+            <h2 style="margin-bottom:1.5rem; font-weight:700;">Add Swimmer Profile</h2>
+            <form id="swimmer-form" onsubmit="saveSwimmerProfile(event)">
+                <div class="form-group">
+                    <label for="swimmer-name">Swimmer Name</label>
+                    <input type="text" id="swimmer-name" required placeholder="e.g. Bobby, Emily">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="age-group">Age Group</label>
+                        <select id="age-group">
+                            <option value="adult">Adult</option>
+                            <option value="child">Child</option>
+                            <option value="toddler">Toddler</option>
+                            <option value="senior">Older Adult / Senior</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="swim-ability">Swimming Ability</label>
+                        <select id="swim-ability">
+                            <option value="strong">Strong Swimmer</option>
+                            <option value="average">Average Swimmer</option>
+                            <option value="weak">Weak Swimmer / Non-swimmer</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="allergies">Known Allergies</label>
+                    <input type="text" id="allergies" placeholder="e.g. chlorine allergy, skin rashes, or leave blank">
+                </div>
+
+                <h4 style="margin:1rem 0 0.5rem 0; font-size:0.9rem; color:var(--text-secondary);">Health Checklist</h4>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="asthma"> Asthma / Respiratory sensitivity
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="eczema"> Sensitive skin / Eczema / Psoriasis
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="eye-sens"> High eye sensitivity to pool water
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="cuts-wounds"> Open cuts / scratches / stitches
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="illness"> Recent stomach illness (last 2 weeks)
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-primary" style="width:100%; margin-top:1.5rem; padding:0.9rem;">Add Swimmer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JS Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
