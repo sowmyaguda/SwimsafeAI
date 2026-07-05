@@ -122,18 +122,44 @@ function handleLogout() {
 }
 
 // Swimmer Modal and Controller
-function openSwimmerModal() {
+function openSwimmerModal(editIdx = null) {
     document.getElementById('swimmer-modal').style.display = 'flex';
+    
+    if (editIdx !== null) {
+        document.getElementById('modal-title').innerText = "Edit Swimmer Profile";
+        document.getElementById('modal-submit-btn').innerText = "Save Changes";
+        document.getElementById('editing-swimmer-idx').value = editIdx;
+        
+        const swimmer = swimmersList[editIdx];
+        if (swimmer) {
+            document.getElementById('swimmer-name').value = swimmer.name;
+            document.getElementById('age-group').value = swimmer.age_group;
+            document.getElementById('swim-ability').value = swimmer.swimming_ability;
+            document.getElementById('allergies').value = swimmer.allergies || "";
+            document.getElementById('asthma').checked = swimmer.asthma_breathing_sensitivity;
+            document.getElementById('eczema').checked = swimmer.sensitive_skin_eczema;
+            document.getElementById('eye-sens').checked = swimmer.eye_sensitivity;
+            document.getElementById('cuts-wounds').checked = swimmer.open_cuts_wounds;
+            document.getElementById('illness').checked = swimmer.recent_illness;
+        }
+    } else {
+        document.getElementById('modal-title').innerText = "Add Swimmer Profile";
+        document.getElementById('modal-submit-btn').innerText = "Add Swimmer";
+        document.getElementById('editing-swimmer-idx').value = "";
+    }
 }
 
 function closeSwimmerModal() {
     document.getElementById('swimmer-modal').style.display = 'none';
     document.getElementById('swimmer-form').reset();
+    document.getElementById('editing-swimmer-idx').value = "";
 }
 
 function saveSwimmerProfile(event) {
     event.preventDefault();
-    const newSwimmer = {
+    const editIdxVal = document.getElementById('editing-swimmer-idx').value;
+    
+    const swimmer = {
         name: document.getElementById('swimmer-name').value,
         age_group: document.getElementById('age-group').value,
         swimming_ability: document.getElementById('swim-ability').value,
@@ -145,7 +171,13 @@ function saveSwimmerProfile(event) {
         recent_illness: document.getElementById('illness').checked
     };
     
-    swimmersList.push(newSwimmer);
+    if (editIdxVal !== "") {
+        const idx = parseInt(editIdxVal);
+        swimmersList[idx] = swimmer;
+    } else {
+        swimmersList.push(swimmer);
+    }
+    
     localStorage.setItem('poolsense_swimmers', JSON.stringify(swimmersList));
     renderSwimmers();
     closeSwimmerModal();
@@ -169,14 +201,20 @@ function renderSwimmers() {
     swimmersList.forEach((swimmer, idx) => {
         const badge = document.createElement('div');
         badge.className = 'swimmer-badge';
+        badge.style.display = 'flex';
+        badge.style.justifyContent = 'space-between';
+        badge.style.alignItems = 'center';
         badge.innerHTML = `
-            <div>
-                <span>${swimmer.name}</span>
+            <div style="text-align: left;">
+                <span style="font-weight: 600;">${swimmer.name}</span>
                 <small style="display:block; color:var(--text-secondary); font-size:0.75rem;">
                     ${swimmer.age_group} (${swimmer.swimming_ability})
                 </small>
             </div>
-            <button onclick="deleteSwimmer(${idx})">&times;</button>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <button onclick="openSwimmerModal(${idx})" style="background:transparent; border:none; color:var(--accent-cyan); cursor:pointer; font-size:1rem;">✏️</button>
+                <button onclick="deleteSwimmer(${idx})" style="background:transparent; border:none; color:var(--color-danger); cursor:pointer; font-size:1.1rem;">🗑️</button>
+            </div>
         `;
         container.appendChild(badge);
     });

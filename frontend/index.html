@@ -290,8 +290,9 @@
     <div class="modal" id="swimmer-modal">
         <div class="modal-content glass">
             <button class="modal-close" onclick="closeSwimmerModal()">&times;</button>
-            <h2 style="margin-bottom:1.5rem; font-weight:700;">Add Swimmer Profile</h2>
+            <h2 id="modal-title" style="margin-bottom:1.5rem; font-weight:700;">Add Swimmer Profile</h2>
             <form id="swimmer-form" onsubmit="saveSwimmerProfile(event)">
+                <input type="hidden" id="editing-swimmer-idx">
                 <div class="form-group">
                     <label for="swimmer-name">Swimmer Name</label>
                     <input type="text" id="swimmer-name" required placeholder="e.g. Bobby, Emily">
@@ -341,7 +342,7 @@
                     </label>
                 </div>
 
-                <button type="submit" class="btn-primary" style="width:100%; margin-top:1.5rem; padding:0.9rem;">Add Swimmer</button>
+                <button type="submit" class="btn-primary" style="width:100%; margin-top:1.5rem; padding:0.9rem;" id="modal-submit-btn">Add Swimmer</button>
             </form>
         </div>
     </div>
