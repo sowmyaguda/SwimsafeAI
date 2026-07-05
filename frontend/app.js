@@ -2,6 +2,7 @@
 let currentUser = null;
 let swimmersList = [];
 let activeSessionId = null;
+const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? '' : 'http://127.0.0.1:8080';
 
 // Initial Setup
 document.addEventListener('DOMContentLoaded', () => {
@@ -238,7 +239,7 @@ async function submitSwimSafeRequest(confirmAnswer = null) {
     try {
         // 1. Create session if we don't have one
         if (!activeSessionId) {
-            const sessionResponse = await fetch('/apps/app/users/user/sessions', {
+            const sessionResponse = await fetch(BACKEND_URL + '/apps/app/users/user/sessions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -270,7 +271,7 @@ async function submitSwimSafeRequest(confirmAnswer = null) {
         }
         
         // 3. Post run request to the agent
-        const runResponse = await fetch('/run', {
+        const runResponse = await fetch(BACKEND_URL + '/run', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
