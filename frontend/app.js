@@ -247,9 +247,20 @@ async function submitSwimSafeRequest(confirmAnswer = null) {
         }
         
         // 2. Assemble input payload
-        let messageText = "";
+        let newMessagePayload;
         if (confirmAnswer) {
-            messageText = confirmAnswer;
+            newMessagePayload = {
+                role: 'user',
+                parts: [{
+                    function_response: {
+                        id: 'confirm_override',
+                        name: 'confirm_override',
+                        response: {
+                            confirm_override: confirmAnswer
+                        }
+                    }
+                }]
+            };
         } else {
             const poolReadings = {
                 free_chlorine: parseFloat(document.getElementById('free-chlorine').value),
@@ -266,7 +277,10 @@ async function submitSwimSafeRequest(confirmAnswer = null) {
                 pool_readings: poolReadings,
                 swimmers: swimmersList
             };
-            messageText = JSON.stringify(fullPayload);
+            newMessagePayload = {
+                role: 'user',
+                parts: [{ text: JSON.stringify(fullPayload) }]
+            };
         }
         
         // 3. Post run request to the agent
@@ -277,10 +291,7 @@ async function submitSwimSafeRequest(confirmAnswer = null) {
                 appName: 'app',
                 userId: 'user',
                 sessionId: activeSessionId,
-                newMessage: {
-                    role: 'user',
-                    parts: [{ text: messageText }]
-                }
+                newMessage: newMessagePayload
             })
         });
         

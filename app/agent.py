@@ -257,7 +257,12 @@ async def hitl_checkpoint(ctx: Context, node_input: Any):
             )
             return
         
-        user_response = ctx.resume_inputs["confirm_override"].strip().lower()
+        raw_val = ctx.resume_inputs["confirm_override"]
+        if isinstance(raw_val, dict):
+            user_response = (raw_val.get("confirm_override") or raw_val.get("response") or "no")
+        else:
+            user_response = str(raw_val)
+        user_response = user_response.strip().lower()
         if user_response != "yes":
             # Override aborted. Update the verdicts to block swimming
             aborted_output = {
