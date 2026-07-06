@@ -185,18 +185,18 @@ Open **[http://localhost:18081](http://localhost:18081)** in your browser.
 ## Push to GitHub
 
 1. Create a new repo at https://github.com/new
-   - Name: pool-sense
+   - Name: SwimsafeAI
    - Visibility: Public or Private
    - Do NOT initialize with README (you already have one)
 
 2. In your terminal, navigate into your project folder:
    ```bash
-   cd pool-sense
+   cd swimsafe-ai
    git init
    git add .
-   git commit -m "Initial commit: pool-sense ADK agent"
+   git commit -m "Initial commit: SwimSafe AI Agent"
    git branch -M main
-   git remote add origin https://github.com/<your-username>/pool-sense.git
+   git remote add origin https://github.com/sowmyaguda/SwimsafeAI.git
    git push -u origin main
    ```
 
