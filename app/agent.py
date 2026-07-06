@@ -138,9 +138,10 @@ orchestrator = LlmAgent(
          * 'not recommended' if ANY swimmer is 'not recommended' or the pool chemistry is 'danger'.
          * 'caution' if any swimmer has a 'caution' verdict and none are 'not recommended'.
          * 'safe' if all swimmers are 'safe'.
+         * If NO swimmers are provided, the overall verdict should be based solely on pool chemistry ('safe', 'caution', or 'not recommended' depending on chemical safety status).
        - Check if a pool manager alert is required (e.g., chlorine < 1.0, pH < 7.0 or > 7.8, contamination incident, or turbid water). If so, draft a concise alert message.
     
-    Assemble and output the final structured PoolSenseOutput.
+    CRITICAL: If the input has no swimmers (the swimmers list is empty), set `swimmer_verdicts` to an empty list []. Do NOT write conversational text; you must always output a valid JSON conforming to PoolSenseOutput.
     """,
     description="Coordinates pool water and swimmer safety evaluations.",
     tools=[AgentTool(pool_analyzer), AgentTool(swimmer_safety_analyst)],
