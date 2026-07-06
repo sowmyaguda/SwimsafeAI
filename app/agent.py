@@ -356,7 +356,7 @@ def final_response(node_input: Any):
     )
     yield Event(output=node_input)
 
-@node(rerun_on_resume=False)
+
 # ---------------------------------------------------------
 # Workflow Definitions
 # ---------------------------------------------------------
