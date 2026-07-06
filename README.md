@@ -15,8 +15,8 @@ A personalized swim/no-swim safety advisor that analyzes pool chemical metrics a
 ## Quick Start
 1. Clone this repository:
    ```bash
-   git clone <repo-url>
-   cd pool-sense
+   git clone https://github.com/sowmyaguda/SwimsafeAI.git
+   cd swimsafe-ai
    ```
 2. Set up your environment file:
    - **macOS/Linux**:
