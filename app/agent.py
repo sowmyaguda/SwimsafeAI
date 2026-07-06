@@ -339,12 +339,11 @@ def final_response(node_input: Any):
 @node(rerun_on_resume=False)
 async def orchestrator_node(ctx: Context, node_input: str):
     """Wrap orchestrator agent to disable rerun_on_resume and bypass LLM on resume."""
-    # Check if we are resuming from a HITL pause. If so, return cached orchestrator output
-    if ctx.resume_inputs and "confirm_override" in ctx.resume_inputs:
-        cached = ctx.state.get("orchestrator_output")
-        if cached:
-            yield Event(output=cached)
-            return
+    # Check if we already have a cached orchestrator output. If so, return cached orchestrator output directly to bypass Gemini on resume!
+    cached = ctx.state.get("orchestrator_output")
+    if cached:
+        yield Event(output=cached)
+        return
 
     # First pass: run the orchestrator agent and save output to ctx.state
     from google.adk.workflow._llm_agent_wrapper import run_llm_agent_as_node
