@@ -47,6 +47,49 @@ A personalized swim/no-swim safety advisor that analyzes pool chemical metrics a
 
 ---
 
+## Architecture Diagram
+```mermaid
+graph TD
+    START[User Input: Readings & Swimmers] --> SecCheck[Security Checkpoint Node]
+    SecCheck -- SECURITY_EVENT --> SecHandler[Security Incident Handler]
+    SecCheck -- clean --> Orch[Orchestrator Agent]
+    
+    Orch -->|AgentTool| PoolAna[Pool Analyzer Agent]
+    Orch -->|AgentTool| SwimAna[Swimmer Safety Analyst Agent]
+    
+    PoolAna <-->|MCP Protocol| MCPServer[MCP Server: 3 Tools]
+    
+    PoolAna --> Orch
+    SwimAna --> Orch
+    
+    Orch --> HITL[HITL Checkpoint Node]
+    HITL -->|yields RequestInput if danger| UserConfirm{User Response}
+    UserConfirm -->|Abort/Danger| FinalNode[Final Response Node]
+    UserConfirm -->|Override Approved| FinalNode
+    
+    SecHandler --> FinalNode
+    
+    FinalNode --> Output[Formatted Markdown Safety Report]
+```
+
+---
+
+## Model Context Protocol (MCP) Server
+SwimSafe AI integrates an MCP Server to decouple pool chemistry guidelines and diagnostic algorithms from the main LLM orchestration. The server is implemented in [app/mcp_server.py](file:///Users/sowmyaguda/Downloads/agents_capstone_project/swimsafe-ai/app/mcp_server.py) using `FastMCP`.
+
+It exposes **3 core tools** to the Pool Analyzer Agent:
+1. **`get_chemical_guidelines`**: 
+   * **What it does**: Returns official pool safety thresholds (e.g., Free Chlorine: 1.0–3.0 ppm, pH: 7.2–7.8, Stabilizer/CYA: 30–50 ppm, and absolute maximums for swimming).
+   * **Why it's used**: Ensures the agent relies on precise, verified chemical boundaries rather than LLM hallucination.
+2. **`diagnose_water_issues`**:
+   * **What it does**: Diagnoses common pool water anomalies (like low chlorine, acidic pH, or cloudy water scaling) and outputs clear corrective recommendations.
+   * **Why it's used**: Translates raw metrics into structured diagnostic suggestions.
+3. **`calculate_lsi`** (Langelier Saturation Index):
+   * **What it does**: Calculates LSI water stability using pH, temperature, calcium hardness, total alkalinity, and cyanuric acid. 
+   * **Why it's used**: Classifies water as corrosive, scaling, or balanced.
+
+---
+
 ## How to Run
 
 ### Option A: Custom Web Dashboard (Recommended)
