@@ -342,11 +342,10 @@ def final_response(node_input: dict):
 @node(rerun_on_resume=False)
 async def orchestrator_node(ctx: Context, node_input: str):
     """Wrap orchestrator agent to disable rerun_on_resume."""
-    from google.genai import types
-    content = types.Content(role="user", parts=[types.Part.from_text(text=node_input)])
+    from google.adk.workflow._llm_agent_wrapper import run_llm_agent_as_node
     
     # Run the orchestrator agent and save output to ctx.state
-    async for event in orchestrator.run_async(new_message=content, session=ctx.session):
+    async for event in run_llm_agent_as_node(orchestrator, ctx=ctx, node_input=node_input):
         if event.output:
             ctx.state["orchestrator_output"] = event.output
         yield event
