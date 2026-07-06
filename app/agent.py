@@ -167,12 +167,6 @@ def security_checkpoint(ctx: Context, node_input: types.Content):
     """
     Security check for PII scrubbing, injection detection, and input constraints.
     """
-    # Check if we are resuming from a HITL pause. If so, return the cached original_input
-    if ctx.resume_inputs and "confirm_override" in ctx.resume_inputs:
-        original = ctx.state.get("original_input")
-        if original:
-            return Event(output=original, route="clean")
-
     # 1. Extract text from the content
     text = ""
     if node_input and node_input.parts:
@@ -204,7 +198,6 @@ def security_checkpoint(ctx: Context, node_input: types.Content):
         audit_log("WARNING", "INVALID_INPUT_METRICS", {"input_preview": text[:100]})
         return Event(output="Validation Check: Invalid negative values provided for pool readings.", route="SECURITY_EVENT")
 
-    ctx.state["original_input"] = scrubbed_text
     audit_log("INFO", "INPUT_CLEARED", {"pii_scrubbed": scrubbed_text != text})
     return Event(output=scrubbed_text, route="clean")
 
@@ -343,6 +336,23 @@ def final_response(node_input: Any):
     )
     yield Event(output=node_input)
 
+@node(rerun_on_resume=False)
+async def orchestrator_node(ctx: Context, node_input: str):
+    """Wrap orchestrator agent to disable rerun_on_resume and bypass LLM on resume."""
+    # Check if we are resuming from a HITL pause. If so, return cached orchestrator output
+    if ctx.resume_inputs and "confirm_override" in ctx.resume_inputs:
+        cached = ctx.state.get("orchestrator_output")
+        if cached:
+            yield Event(output=cached)
+            return
+
+    # First pass: run the orchestrator agent and save output to ctx.state
+    from google.adk.workflow._llm_agent_wrapper import run_llm_agent_as_node
+    async for event in run_llm_agent_as_node(orchestrator, ctx=ctx, node_input=node_input):
+        if event.output:
+            ctx.state["orchestrator_output"] = event.output
+        yield event
+
 # ---------------------------------------------------------
 # Workflow Definitions
 # ---------------------------------------------------------
@@ -353,8 +363,10 @@ root_agent = Workflow(
     name="pool_sense",
     edges=[
         ('START', security_checkpoint),
-        (security_checkpoint, {"clean": orchestrator, "SECURITY_EVENT": security_incident_handler}),
-        (orchestrator, hitl_checkpoint),
+        # Dummy edge so the runner registers orchestrator and all of its MCP tools!
+        ('START', {"dummy": orchestrator}),
+        (security_checkpoint, {"clean": orchestrator_node, "SECURITY_EVENT": security_incident_handler}),
+        (orchestrator_node, hitl_checkpoint),
         (hitl_checkpoint, final_response),
         (security_incident_handler, final_response),
     ],
