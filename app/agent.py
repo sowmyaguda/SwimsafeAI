@@ -267,7 +267,7 @@ async def hitl_checkpoint(ctx: Context, node_input: Any):
 
     yield Event(output=orchestrator_output)
 
-def final_response(node_input: dict):
+def final_response(node_input: Any):
     """
     Formulate the final, highly styled output report for display in the Web UI.
     """
