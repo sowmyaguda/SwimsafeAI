@@ -54,14 +54,20 @@ graph TD
 ```
 
 ## How to Run
-- Run the interactive playground UI:
-  ```bash
-  make playground
-  ```
-- Run the FastAPI server:
+
+- **Option A: Custom Web Dashboard (Recommended)**
+  Run the backend API and serve the styled web application dashboard:
   ```bash
   make run
   ```
+  Open **[http://localhost:8080/dashboard/](http://localhost:8080/dashboard/)** in your web browser. This features a beautiful single-page dashboard for registering/editing swimmer profiles, accessing inline chemistry help tooltips, and getting Safety verdicts.
+
+- **Option B: Interactive Playground UI**
+  Run the built-in ADK development playground:
+  ```bash
+  make playground
+  ```
+  Open **[http://localhost:18081](http://localhost:18081)** in your browser.
 
 ## Sample Test Cases
 
