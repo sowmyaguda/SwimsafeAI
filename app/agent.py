@@ -122,6 +122,25 @@ swimmer_safety_analyst = LlmAgent(
 )
 
 # ---------------------------------------------------------
+# Callback for Bypass on Resume
+# ---------------------------------------------------------
+
+def orchestrator_bypass_callback(callback_context):
+    """Bypasses LLM execution on resume by returning cached PoolSenseOutput directly."""
+    cached = callback_context.state.get("orchestrator_output")
+    if cached:
+        import json
+        if isinstance(cached, dict):
+            cached_json = json.dumps(cached)
+        else:
+            cached_json = str(cached)
+        return types.Content(
+            role="model",
+            parts=[types.Part.from_text(text=cached_json)]
+        )
+    return None
+
+# ---------------------------------------------------------
 # Orchestrator
 # ---------------------------------------------------------
 
@@ -148,6 +167,7 @@ orchestrator = LlmAgent(
     output_schema=PoolSenseOutput,
     output_key="orchestrator_output",
     rerun_on_resume=False,
+    before_agent_callback=orchestrator_bypass_callback,
 )
 
 # ---------------------------------------------------------
@@ -337,21 +357,6 @@ def final_response(node_input: Any):
     yield Event(output=node_input)
 
 @node(rerun_on_resume=False)
-async def orchestrator_node(ctx: Context, node_input: str):
-    """Wrap orchestrator agent to disable rerun_on_resume and bypass LLM on resume."""
-    # Check if we already have a cached orchestrator output. If so, return cached orchestrator output directly to bypass Gemini on resume!
-    cached = ctx.state.get("orchestrator_output")
-    if cached:
-        yield Event(output=cached)
-        return
-
-    # First pass: run the orchestrator agent and save output to ctx.state
-    from google.adk.workflow._llm_agent_wrapper import run_llm_agent_as_node
-    async for event in run_llm_agent_as_node(orchestrator, ctx=ctx, node_input=node_input):
-        if event.output:
-            ctx.state["orchestrator_output"] = event.output
-        yield event
-
 # ---------------------------------------------------------
 # Workflow Definitions
 # ---------------------------------------------------------
@@ -362,10 +367,8 @@ root_agent = Workflow(
     name="pool_sense",
     edges=[
         ('START', security_checkpoint),
-        # Dummy edge so the runner registers orchestrator and all of its MCP tools!
-        ('START', {"dummy": orchestrator}),
-        (security_checkpoint, {"clean": orchestrator_node, "SECURITY_EVENT": security_incident_handler}),
-        (orchestrator_node, hitl_checkpoint),
+        (security_checkpoint, {"clean": orchestrator, "SECURITY_EVENT": security_incident_handler}),
+        (orchestrator, hitl_checkpoint),
         (hitl_checkpoint, final_response),
         (security_incident_handler, final_response),
     ],
