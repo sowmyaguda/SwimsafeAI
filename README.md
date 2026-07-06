@@ -2,10 +2,15 @@
 
 A personalized swim/no-swim safety advisor that analyzes pool chemical metrics against swimmer health profiles to make smart, personalized safety verdicts.
 
-## Prerequisites
-- **Python**: Version 3.11 or higher (3.11–3.13 recommended)
-- **uv**: Python package manager
-- **Gemini API Key**: Obtain one from [Google AI Studio](https://aistudio.google.com/apikey)
+## Prerequisites & API Key Setup
+1. **Python**: Version 3.11 or higher (3.11–3.13 recommended).
+2. **uv**: Fast Python package manager. If you don't have it, install it by running:
+   - **macOS/Linux**: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+   - **Windows**: `powershell -c "irm https://astral.sh/uv/install.ps1 | iex"`
+3. **Gemini API Key**: 
+   - Go to [Google AI Studio API Keys](https://aistudio.google.com/apikey).
+   - Sign in with your Google account.
+   - Click **Create API Key** and copy the generated key.
 
 ## Quick Start
 1. Clone this repository:
@@ -13,61 +18,62 @@ A personalized swim/no-swim safety advisor that analyzes pool chemical metrics a
    git clone <repo-url>
    cd pool-sense
    ```
-2. Set up environment:
-   ```bash
-   cp .env.example .env
-   # Open .env and add your GOOGLE_API_KEY
-   ```
+2. Set up your environment file:
+   - **macOS/Linux**:
+     ```bash
+     cp .env.example .env
+     ```
+   - **Windows (Command Prompt / CMD)**:
+     ```cmd
+     copy .env.example .env
+     ```
+   - **Windows (PowerShell)**:
+     ```powershell
+     Copy-Item .env.example .env
+     ```
+   - Open `.env` in a text editor and add your copied key:
+     ```env
+     GOOGLE_API_KEY=your_actual_api_key_here
+     ```
 3. Install dependencies:
-   ```bash
-   make install
-   ```
-4. Run the playground:
-   ```bash
-   make playground
-   # Open http://localhost:18081 in your browser
-   ```
+   - **macOS/Linux**:
+     ```bash
+     make install
+     ```
+   - **Windows**:
+     ```powershell
+     uv sync
+     ```
 
-## Architecture Diagram
-```mermaid
-graph TD
-    START[User Input: Readings & Swimmers] --> SecCheck[Security Checkpoint Node]
-    SecCheck -- SECURITY_EVENT --> SecHandler[Security Incident Handler]
-    SecCheck -- clean --> Orch[Orchestrator Agent]
-    
-    Orch -->|AgentTool| PoolAna[Pool Analyzer Agent]
-    Orch -->|AgentTool| SwimAna[Swimmer Safety Analyst Agent]
-    
-    PoolAna <-->|MCP Protocol| MCPServer[MCP Server: 3 Tools]
-    
-    PoolAna --> Orch
-    SwimAna --> Orch
-    
-    Orch --> HITL[HITL Checkpoint Node]
-    HITL -->|yields RequestInput if danger| UserConfirm{User Response}
-    UserConfirm -->|Abort/Danger| FinalNode[Final Response Node]
-    UserConfirm -->|Override Approved| FinalNode
-    
-    SecHandler --> FinalNode
-    
-    FinalNode --> Output[Formatted Markdown Safety Report]
-```
+---
 
 ## How to Run
 
-- **Option A: Custom Web Dashboard (Recommended)**
-  Run the backend API and serve the styled web application dashboard:
+### Option A: Custom Web Dashboard (Recommended)
+Run the backend API and serve the styled web application dashboard:
+- **macOS/Linux**:
   ```bash
   make run
   ```
-  Open **[http://localhost:8080/dashboard/](http://localhost:8080/dashboard/)** in your web browser. This features a beautiful single-page dashboard for registering/editing swimmer profiles, accessing inline chemistry help tooltips, and getting Safety verdicts.
+- **Windows**:
+  ```powershell
+  uv run uvicorn app.fast_api_app:app --host 127.0.0.1 --port 8080
+  ```
 
-- **Option B: Interactive Playground UI**
-  Run the built-in ADK development playground:
+Open **[http://localhost:8080/dashboard/](http://localhost:8080/dashboard/)** in your web browser. This features a beautiful single-page dashboard for registering/editing swimmer profiles, accessing inline chemistry help tooltips, and getting Safety verdicts.
+
+### Option B: Interactive Playground UI
+Run the built-in ADK development playground:
+- **macOS/Linux**:
   ```bash
   make playground
   ```
-  Open **[http://localhost:18081](http://localhost:18081)** in your browser.
+- **Windows**:
+  ```powershell
+  uv run adk web app --host 127.0.0.1 --port 18081 --reload_agents
+  ```
+
+Open **[http://localhost:18081](http://localhost:18081)** in your browser.
 
 ## Sample Test Cases
 

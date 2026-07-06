@@ -230,6 +230,16 @@ async function submitSwimSafeRequest(confirmAnswer = null) {
     const placeholder = document.getElementById('results-placeholder');
     const loader = document.getElementById('results-loader');
     const content = document.getElementById('results-content');
+
+    if (!confirmAnswer) {
+        placeholder.innerHTML = `
+            <span style="font-size:3.5rem;">🏖️</span>
+            <h3 style="font-weight:600; margin-top: 1rem;">No Assessment Run Yet</h3>
+            <p style="color:var(--text-secondary); max-width:320px; font-size:0.9rem; margin-top:0.5rem;">
+                Fill in the pool chemistry details and swimmer group profiles on the left, then click check.
+            </p>
+        `;
+    }
     
     placeholder.classList.add('hidden');
     loader.classList.remove('hidden');
@@ -333,7 +343,15 @@ async function submitSwimSafeRequest(confirmAnswer = null) {
             if (userApproved) {
                 submitSwimSafeRequest("yes");
             } else {
-                submitSwimSafeRequest("no");
+                placeholder.innerHTML = `
+                    <span style="font-size:3.5rem;">⚠️</span>
+                    <h3 style="font-weight:600; margin-top: 1rem; color: var(--color-danger);">Assessment Cancelled</h3>
+                    <p style="color:var(--text-secondary); max-width:320px; font-size:0.9rem; margin-top:0.5rem;">
+                        The check was cancelled because of a danger warning regarding the pool chemistry levels. Please adjust the chemical levels or consult a pool manager.
+                    </p>
+                `;
+                loader.classList.add('hidden');
+                placeholder.classList.remove('hidden');
             }
             return;
         }
