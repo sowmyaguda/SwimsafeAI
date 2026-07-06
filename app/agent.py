@@ -254,7 +254,7 @@ async def hitl_checkpoint(ctx: Context, node_input: Any):
             warning_list = ", ".join(warnings) if warnings else "extreme chemical imbalance"
             yield RequestInput(
                 interrupt_id="confirm_override",
-                message=f"⚠️ DANGER WARNING: The pool conditions are flagged as DANGEROUS! Warnings: {warning_list}. Do you wish to override this warning and show personal swimmer advice anyway? (Enter 'yes' to proceed, or 'no' to abort):"
+                message=f"⚠️ DANGER WARNING: The pool conditions are flagged as DANGEROUS!\n\nWarnings:\n{warning_list}\n\nDo you wish to override this warning and show personal swimmer advice anyway? (Click OK to proceed, or Cancel to abort):"
             )
             return
         

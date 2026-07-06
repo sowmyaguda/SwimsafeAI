@@ -329,9 +329,9 @@ async function submitSwimSafeRequest(confirmAnswer = null) {
             // Handle HITL warning and request confirmation
             const part = interruptEvent.content?.parts?.[0];
             const msg = part?.functionCall?.args?.message || part?.text || "The pool chemistry is flagged as dangerously unbalanced! Do you wish to override this warning and show personal swimmer advice anyway? (Enter 'yes' to proceed, or 'no' to abort):";
-            const confirmMsg = prompt(msg);
-            if (confirmMsg) {
-                submitSwimSafeRequest(confirmMsg);
+            const userApproved = confirm(msg);
+            if (userApproved) {
+                submitSwimSafeRequest("yes");
             } else {
                 submitSwimSafeRequest("no");
             }
