@@ -12,9 +12,9 @@ Our architecture diagram shows the end-to-end flow. The input first passes throu
 
 Once cleared, the Orchestrator delegates tasks to two sub-agents via AgentTool: the Pool Analyzer Agent, which uses a decoupled Model Context Protocol (MCP) server to check guidelines and calculate the Langelier Saturation Index, and the Swimmer Safety Analyst Agent, which handles individual swimmer risks. If conditions are dangerous, a Human-in-the-Loop (HITL) Checkpoint interrupts the graph to ask for confirmation.
 
-[2:00 — LIVE DEMO & DEPLOYABILITY]
-(show dashboard at http://localhost:8080/dashboard/ or hosted GitHub Pages URL)
-Let's look at the live custom dashboard. This frontend is deployable directly on GitHub Pages, connecting to the backend via CORS-enabled API routes. 
+[2:00 — LIVE DEMO]
+(show dashboard at http://localhost:8080/dashboard/)
+Let's look at the live custom dashboard. It provides a fully custom single-page user interface to enter pool conditions and swimmer information. 
 
 First, we see our pool conditions on the left. Normal users might not know what these readings mean, so Antigravity and I implemented an inline help system: a "Need Help?" card explaining where to find values, and hoverable "?" tooltips next to Chlorine, pH, and Cyanuric Acid.
 
