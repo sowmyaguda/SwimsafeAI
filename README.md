@@ -50,25 +50,34 @@ A personalized swim/no-swim safety advisor that analyzes pool chemical metrics a
 ## Architecture Diagram
 ```mermaid
 graph TD
-    START[User Input: Readings & Swimmers] --> SecCheck[Security Checkpoint Node]
-    SecCheck -- SECURITY_EVENT --> SecHandler[Security Incident Handler]
-    SecCheck -- clean --> Orch[Orchestrator Agent]
+    START[User Input: Readings & Swimmer Profiles] --> SecCheck[Security Checkpoint Node]
     
-    Orch -->|AgentTool| PoolAna[Pool Analyzer Agent]
-    Orch -->|AgentTool| SwimAna[Swimmer Safety Analyst Agent]
+    subgraph Security Check
+        SecCheck
+        PII[PII Scrubbing]
+        Val[Safety Validation: Injection attacks, Negative values]
+        SecCheck -.-> PII
+        SecCheck -.-> Val
+    end
+
+    SecCheck -->|security event| SecHandler{Security Incident Handler}
+    SecHandler -->|Block / No| Blocked[Request Blocked]
+    SecHandler -->|Clean / Yes| Orch[Orchestrator Agent]
     
-    PoolAna <-->|MCP Protocol| MCPServer[MCP Server: 3 Tools]
+    Orch -->|agent tools| PoolAna[Pool Analyzer Agent]
+    Orch -->|agent tools| SwimAna[Swimmer Safety Analyst Agent]
     
-    PoolAna --> Orch
-    SwimAna --> Orch
+    PoolAna -->|MCP protocol| MCPServer[MCP Server Tools: 3 Tools]
     
-    Orch --> HITL[HITL Checkpoint Node]
-    HITL -->|If Danger| UserConfirm{User Response}
-    HITL -->|If Safe/Normal| FinalNode[Final Response Node]
-    UserConfirm -->|Override Approved| FinalNode
-    UserConfirm -->|Abort/Cancel| CancelUI[Frontend: Show 'Assessment Cancelled' UI]
+    PoolAna -->|More than ideal values? / Yes| HITL[HITL Checkpoint Node]
+    PoolAna -->|No| FinalNode[Final Response Node]
     
-    SecHandler --> BlockedUI[Frontend: Show 'Request Blocked' Message]
+    HITL --> UserConfirm{User Response}
+    UserConfirm -->|Override Approve| FinalNode
+    UserConfirm -->|Abort| Cancelled[Assessment cancelled by user]
+    Cancelled --> FinalNode
+    
+    SwimAna --> FinalNode
     
     FinalNode --> Output[Formatted Markdown Safety Report]
 ```
