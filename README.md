@@ -63,8 +63,9 @@ graph TD
     SwimAna --> Orch
     
     Orch --> HITL[HITL Checkpoint Node]
-    HITL -->|yields RequestInput if danger| UserConfirm{User Response}
-    UserConfirm -->|Override Approved| FinalNode[Final Response Node]
+    HITL -->|If Danger| UserConfirm{User Response}
+    HITL -->|If Safe/Normal| FinalNode[Final Response Node]
+    UserConfirm -->|Override Approved| FinalNode
     UserConfirm -->|Abort/Cancel| CancelUI[Frontend: Show 'Assessment Cancelled' UI]
     
     SecHandler --> BlockedUI[Frontend: Show 'Request Blocked' Message]
