@@ -67,7 +67,7 @@ graph TD
     UserConfirm -->|Override Approved| FinalNode[Final Response Node]
     UserConfirm -->|Abort/Cancel| CancelUI[Frontend: Show 'Assessment Cancelled' UI]
     
-    SecHandler --> FinalNode
+    SecHandler --> BlockedUI[Frontend: Show 'Request Blocked' Message]
     
     FinalNode --> Output[Formatted Markdown Safety Report]
 ```
