@@ -70,15 +70,18 @@ graph TD
     subgraph Pool Chemistry Analysis
         PoolAna[Pool Analyzer Agent]
         MCPServer[MCP Server Tools: 3 Tools]
-        PoolAna <-->|MCP protocol| MCPServer
+        MoreThan[More than ideal values? / Yes]
+        
+        PoolAna -->|MCP protocol| MCPServer
+        PoolAna --> MoreThan
     end
     
-    PoolAna -->|More than ideal values? / Yes| HITL[HITL Checkpoint Node]
-    PoolAna -->|No| Join(( ))
+    MoreThan --> HITL[HITL Checkpoint Node]
+    MoreThan -->|No| Join(( ))
     SwimAna --> Join
     
     HITL --> UserConfirm{User Response}
-    UserConfirm -->|Override Approve| FinalNode
+    UserConfirm -->|Override Approve| FinalNode[FinalNode]
     UserConfirm -->|Abort| Cancelled[Assessment cancelled by user]
     
     Join --> FinalNode
