@@ -64,8 +64,8 @@ graph TD
     
     Orch --> HITL[HITL Checkpoint Node]
     HITL -->|yields RequestInput if danger| UserConfirm{User Response}
-    UserConfirm -->|Abort/Danger| FinalNode[Final Response Node]
-    UserConfirm -->|Override Approved| FinalNode
+    UserConfirm -->|Override Approved| FinalNode[Final Response Node]
+    UserConfirm -->|Abort/Cancel| CancelUI[Frontend: Show 'Assessment Cancelled' UI]
     
     SecHandler --> FinalNode
     
