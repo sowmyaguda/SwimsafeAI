@@ -78,12 +78,26 @@ graph TD
     SwimAna --> Join
     
     HITL --> UserConfirm{User Response}
-    UserConfirm -->|Override Approve| FinalNode
+    UserConfirm -->|Override Approve| FinalNode[Final Response Node]
     UserConfirm -->|Abort| Cancelled[Assessment cancelled by user]
     
     Join --> FinalNode
     
     FinalNode --> Output[Formatted Markdown Safety Report]
+
+    %% Color Styling for Visual Legibility %%
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:1px;
+    classDef startEnd fill:#e8f0fe,stroke:#1a73e8,stroke-width:2px;
+    classDef security fill:#fce8e6,stroke:#d93025,stroke-width:2px;
+    classDef agent fill:#e6f4ea,stroke:#137333,stroke-width:2px;
+    classDef decision fill:#fef7e0,stroke:#b06000,stroke-width:2px;
+    classDef cancel fill:#f1f3f4,stroke:#5f6368,stroke-width:2px;
+    
+    class START,Output startEnd;
+    class SecCheck,SecHandler,Blocked security;
+    class Orch,PoolAna,SwimAna,MCPServer,FinalNode agent;
+    class UserConfirm,HITL decision;
+    class Cancelled cancel;
 ```
 
 ---
