@@ -213,3 +213,6 @@ credentials*.json
 .ruff_cache/
 artifacts/
 
+# Local-only files
+PROJECT_OVERVIEW.md
+
